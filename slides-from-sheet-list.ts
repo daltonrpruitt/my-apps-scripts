@@ -31,9 +31,12 @@ function populateSlidesFromSheet() {
       return;
     }
     
+    // Format names to show first name and last initial
+    const formattedNames = names.map(name => formatName(name));
+    
     // Randomize the names order
-    const randomizedNames = shuffleArray(names);
-    console.log('Names have been randomized');
+    const randomizedNames = shuffleArray(formattedNames);
+    console.log('Names have been formatted and randomized');
     
     // Get the template slide
     const slides = presentation.getSlides();
@@ -83,6 +86,31 @@ function shuffleArray(array) {
   }
   
   return shuffled;
+}
+
+// Function to format names as "FirstName L."
+function formatName(fullName) {
+  if (!fullName || typeof fullName !== 'string') {
+    return fullName; // Return as-is if not a valid string
+  }
+  
+  // Clean up the name (remove extra spaces, trim)
+  const cleanName = fullName.toString().trim().replace(/\s+/g, ' ');
+  
+  // Split the name into parts
+  const nameParts = cleanName.split(' ');
+  
+  if (nameParts.length === 1) {
+    // Only one name provided, return as-is
+    return nameParts[0];
+  }
+  
+  // Get first name and last initial
+  const firstName = nameParts[0];
+  const lastName = nameParts[nameParts.length - 1]; // Get the last part as surname
+  const lastInitial = lastName.charAt(0).toUpperCase();
+  
+  return `${firstName} ${lastInitial}.`;
 }
 
 function createSlideForName(presentation, templateSlide, name, slideNumber) {
@@ -154,9 +182,12 @@ function testSetup() {
     const templateSlide = slides[TEMPLATE_SLIDE_INDEX];
     console.log(`✓ Template slide found: "${templateSlide.getObjectId()}"`);
     
-    // Test names retrieval
+    // Test names retrieval and formatting
     const names = getNamesFromSheet(sheet);
-    console.log(`✓ Found ${names.length} names:`, names.slice(0, 5)); // Show first 5 names
+    const formattedNames = names.map(name => formatName(name));
+    console.log(`✓ Found ${names.length} names`);
+    console.log('Original names:', names.slice(0, 3));
+    console.log('Formatted names:', formattedNames.slice(0, 3));
     
   } catch (error) {
     console.error('❌ Setup test failed:', error.toString());
