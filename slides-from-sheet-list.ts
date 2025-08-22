@@ -31,6 +31,10 @@ function populateSlidesFromSheet() {
       return;
     }
     
+    // Randomize the names order
+    const randomizedNames = shuffleArray(names);
+    console.log('Names have been randomized');
+    
     // Get the template slide
     const slides = presentation.getSlides();
     const templateSlide = slides[TEMPLATE_SLIDE_INDEX];
@@ -39,14 +43,14 @@ function populateSlidesFromSheet() {
       throw new Error(`Template slide not found at index ${TEMPLATE_SLIDE_INDEX}`);
     }
     
-    console.log(`Found ${names.length} names. Creating slides...`);
+    console.log(`Found ${randomizedNames.length} names. Creating slides in randomized order...`);
     
-    // Create a slide for each name
-    names.forEach((name, index) => {
+    // Create a slide for each name (now in randomized order)
+    randomizedNames.forEach((name, index) => {
       createSlideForName(presentation, templateSlide, name, index + 1);
     });
     
-    console.log(`Successfully created ${names.length} slides!`);
+    console.log(`Successfully created ${randomizedNames.length} slides in randomized order!`);
     
   } catch (error) {
     console.error('Error:', error.toString());
@@ -65,6 +69,20 @@ function getNamesFromSheet(sheet) {
     .slice(1); // Remove first row (header)
   
   return names;
+}
+
+// Function to randomize/shuffle an array using Fisher-Yates algorithm
+function shuffleArray(array) {
+  // Create a copy of the array to avoid modifying the original
+  const shuffled = [...array];
+  
+  // Fisher-Yates shuffle algorithm
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  return shuffled;
 }
 
 function createSlideForName(presentation, templateSlide, name, slideNumber) {
