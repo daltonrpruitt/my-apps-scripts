@@ -31,12 +31,19 @@ function populateSlidesFromSheet() {
       return;
     }
     
+    // Remove duplicates from original names first
+    const uniqueNames = removeDuplicates(names);
+    console.log(`Original count: ${names.length}, Unique count: ${uniqueNames.length}`);
+    if (names.length !== uniqueNames.length) {
+      console.log(`Removed ${names.length - uniqueNames.length} duplicate names`);
+    }
+    
     // Format names to show first name and last initial
-    const formattedNames = names.map(name => formatName(name));
+    const formattedNames = uniqueNames.map(name => formatName(name));
     
     // Randomize the names order
     const randomizedNames = shuffleArray(formattedNames);
-    console.log('Names have been formatted and randomized');
+    console.log('Names have been deduplicated, formatted, and randomized');
     
     // Get the template slide
     const slides = presentation.getSlides();
@@ -46,7 +53,7 @@ function populateSlidesFromSheet() {
       throw new Error(`Template slide not found at index ${TEMPLATE_SLIDE_INDEX}`);
     }
     
-    console.log(`Found ${randomizedNames.length} names. Creating slides in randomized order...`);
+    console.log(`Found ${randomizedNames.length} unique names. Creating slides in randomized order...`);
     
     // Create a slide for each name (now in randomized order)
     randomizedNames.forEach((name, index) => {
@@ -111,6 +118,24 @@ function formatName(fullName) {
   const lastInitial = lastName.charAt(0).toUpperCase();
   
   return `${firstName} ${lastInitial}.`;
+}
+
+// Function to remove duplicate names (case-insensitive)
+function removeDuplicates(nameArray) {
+  const seen = new Set();
+  const unique = [];
+  
+  nameArray.forEach(name => {
+    // Convert to lowercase for comparison to handle case differences
+    const normalizedName = name.toString().toLowerCase().trim();
+    
+    if (!seen.has(normalizedName)) {
+      seen.add(normalizedName);
+      unique.push(name); // Keep original case formatting
+    }
+  });
+  
+  return unique;
 }
 
 function createSlideForName(presentation, templateSlide, name, slideNumber) {
@@ -182,12 +207,14 @@ function testSetup() {
     const templateSlide = slides[TEMPLATE_SLIDE_INDEX];
     console.log(`✓ Template slide found: "${templateSlide.getObjectId()}"`);
     
-    // Test names retrieval and formatting
+    // Test names retrieval, deduplication, and formatting
     const names = getNamesFromSheet(sheet);
-    const formattedNames = names.map(name => formatName(name));
-    console.log(`✓ Found ${names.length} names`);
-    console.log('Original names:', names.slice(0, 3));
-    console.log('Formatted names:', formattedNames.slice(0, 3));
+    const uniqueNames = removeDuplicates(names);
+    const formattedNames = uniqueNames.map(name => formatName(name));
+    console.log(`✓ Found ${names.length} names, ${uniqueNames.length} unique, formatted to ${formattedNames.length}`);
+    console.log('Sample original names:', names.slice(0, 3));
+    console.log('Sample unique names:', uniqueNames.slice(0, 3));
+    console.log('Sample formatted names:', formattedNames.slice(0, 3));
     
   } catch (error) {
     console.error('❌ Setup test failed:', error.toString());
